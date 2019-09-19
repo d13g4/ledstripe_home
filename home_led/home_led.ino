@@ -42,7 +42,7 @@ SimplePatternList gPatterns = { confetti };
 
 uint8_t gCurrentPatternNumber = 0; // Index number of which pattern is current
 uint8_t gHue = 0; // rotating "base color" used by many of the patterns
-int delaynumber =0;
+int delaycounter = 0;
 void loop()
 {
   // Call the current pattern function once, updating the 'leds' array
@@ -56,7 +56,14 @@ void loop()
   // do some periodic updates
   EVERY_N_MILLISECONDS( 20 ) { gHue++; } // slowly cycle the "base color" through the rainbow
   EVERY_N_SECONDS( 10 ) { nextPattern(); } // change patterns periodically
-  delaynumber++;
+  if (delaycounter<FRAMES_PER_SECOND)   //start a counter resetting every second
+  {
+    delaycounter++;
+  }
+  else
+  {
+    delaycounter=0;
+  }
 }
 
 #define ARRAY_SIZE(A) (sizeof(A) / sizeof((A)[0]))
@@ -66,6 +73,21 @@ void nextPattern()
   // add one to the current pattern number, and wrap around at the end
   gCurrentPatternNumber = (gCurrentPatternNumber + 1) % ARRAY_SIZE( gPatterns);
 }
+
+void confetti() 
+{
+  // random colored speckles that blink in and fade smoothly
+  fadeToBlackBy( leds, NUM_LEDS, 2);
+  if ((delaycounter % 4)==0)    //using delaycounter modulo 4, so that every 1/4th second the function will be computed
+  {
+    int pos = random16(NUM_LEDS);
+    leds[pos] += CHSV( gHue + random8(64), 200, 255);
+  }
+}
+
+
+
+
 
 void rainbow() 
 {
@@ -84,18 +106,6 @@ void addGlitter( fract8 chanceOfGlitter)
 {
   if( random8() < chanceOfGlitter) {
     leds[ random16(NUM_LEDS) ] += CRGB::White;
-  }
-}
-
-void confetti() 
-{
-  // random colored speckles that blink in and fade smoothly
-  fadeToBlackBy( leds, NUM_LEDS, 2);
-  if (delaynumber==5)
-  {
-    int pos = random16(NUM_LEDS);
-    leds[pos] += CHSV( gHue + random8(64), 200, 255);
-    delaynumber=0;
   }
 }
 
