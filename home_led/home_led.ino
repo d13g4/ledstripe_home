@@ -56,6 +56,12 @@ void loop()
   // do some periodic updates
   EVERY_N_MILLISECONDS( 20 ) { gHue++; } // slowly cycle the "base color" through the rainbow
   EVERY_N_SECONDS( 10 ) { nextPattern(); } // change patterns periodically
+  counter();
+}
+
+#define ARRAY_SIZE(A) (sizeof(A) / sizeof((A)[0]))
+void counter()
+{
   if (delaycounter<FRAMES_PER_SECOND)   //start a counter resetting every second
   {
     delaycounter++;
@@ -65,9 +71,6 @@ void loop()
     delaycounter=0;
   }
 }
-
-#define ARRAY_SIZE(A) (sizeof(A) / sizeof((A)[0]))
-
 void nextPattern()
 {
   // add one to the current pattern number, and wrap around at the end
