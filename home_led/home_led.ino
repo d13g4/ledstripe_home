@@ -22,8 +22,8 @@ FASTLED_USING_NAMESPACE
 #define NUM_LEDS    300
 CRGB leds[NUM_LEDS];
 
-#define BRIGHTNESS          96
-#define FRAMES_PER_SECOND  120
+#define BRIGHTNESS          255
+#define FRAMES_PER_SECOND  60
 
 void setup() {
   delay(3000); // 3 second delay for recovery
@@ -42,7 +42,7 @@ SimplePatternList gPatterns = { confetti };
 
 uint8_t gCurrentPatternNumber = 0; // Index number of which pattern is current
 uint8_t gHue = 0; // rotating "base color" used by many of the patterns
-int delaycounter = 0;
+int delaycounter = 0; //counter for doing stuff frame-exact (coupled with FRAMES_PER_SECOND)
 void loop()
 {
   // Call the current pattern function once, updating the 'leds' array
@@ -80,52 +80,16 @@ void nextPattern()
 void confetti() 
 {
   // random colored speckles that blink in and fade smoothly
-  fadeToBlackBy( leds, NUM_LEDS, 2);
-  if ((delaycounter % 4)==0)    //using delaycounter modulo 4, so that every 1/4th second the function will be computed
+  if ((delaycounter % 2)==0)    //using delaycounter modulo 4, so that every 1/4th second the function will be computed
   {
     int pos = random16(NUM_LEDS);
     leds[pos] += CHSV( gHue + random8(64), 200, 255);
+    leds[pos].subtractFromRGB(127);
+    leds[pos].subtractFromRGB((random16(32)+32));
   }
-}
-
-
-
-
-
-void rainbow() 
-{
-  // FastLED's built-in rainbow generator
-  fill_rainbow( leds, NUM_LEDS, gHue, 7);
-}
-
-void rainbowWithGlitter() 
-{
-  // built-in FastLED rainbow, plus some random sparkly glitter
-  rainbow();
-  addGlitter(80);
-}
-
-void addGlitter( fract8 chanceOfGlitter) 
-{
-  if( random8() < chanceOfGlitter) {
-    leds[ random16(NUM_LEDS) ] += CRGB::White;
+  if ((delaycounter % 8)==0)
+  {
+    fadeToBlackBy( leds, NUM_LEDS, 1);
   }
-}
-
-void sinelon()
-{
-  // a colored dot sweeping back and forth, with fading trails
-  fadeToBlackBy( leds, NUM_LEDS, 20);
-  int pos = beatsin16( 13, 0, NUM_LEDS-1 );
-  leds[pos] += CHSV( gHue, 255, 192);
-}
-
-void juggle() {
-  // eight colored dots, weaving in and out of sync with each other
-  fadeToBlackBy( leds, NUM_LEDS, 20);
-  byte dothue = 0;
-  for( int i = 0; i < 8; i++) {
-    leds[beatsin16( i+7, 0, NUM_LEDS-1 )] |= CHSV(dothue, 200, 255);
-    dothue += 32;
-  }
+  
 }
